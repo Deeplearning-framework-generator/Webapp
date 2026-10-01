@@ -2,8 +2,9 @@ import importlib
 import logging
 import pkgutil
 from types import ModuleType
+from typing import NoReturn
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 
 log = logging.getLogger(__name__)
 
@@ -31,3 +32,21 @@ def include_routers(
 
     log.info("Loaded routers from %s: %s", pkg.__name__, ", ".join(included) or "none")
     return included
+
+def log_and_raise(
+        exc: Exception,
+        message: str |None = None,
+        *,
+        logger: logging.Logger | None = None,
+        level: int= logging.error,
+        cause: Exception |None = None
+) -> NoReturn:
+    (logger or log).log(
+        level,
+        message or str(exc),
+        exc_info=cause or exc,
+        stacklevel=2
+    )
+    if cause is not None:
+        raise exec from cause
+    raise exec

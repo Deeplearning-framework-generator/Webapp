@@ -1,2 +1,3 @@
 fastapi[standard]
 sqlalchemy[asyncio]
+fastapi-repository
