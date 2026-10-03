@@ -11,11 +11,14 @@ YAML_FILES = [
     CONFIG_DIR / "application.yaml",
     CONFIG_DIR / f"application-{PROFILE}.yaml",
 ]
+
 class DataSourceSettings(BaseModel):
-    type: str | None = None
-    url: str | None = None
+    host: str
+    drivername: str
+    port: int
     username: str | None = None
     password: SecretStr | None = None
+    database: str
     pool_size: int = 5
     
 class Settings(BaseSettings):
@@ -25,7 +28,7 @@ class Settings(BaseSettings):
 
     model_config = SettingsConfigDict(
         yaml_file=YAML_FILES,
-        env_file=".env",
+        env_file= CONFIG_DIR / f"{PROFILE}.env",
         env_prefix="APP_",
         env_nested_delimiter="__",
     )

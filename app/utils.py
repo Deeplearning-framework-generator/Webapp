@@ -1,8 +1,9 @@
+from functools import lru_cache
 import importlib
 import logging
 import pkgutil
 from types import ModuleType
-from typing import NoReturn
+from typing import Callable, NoReturn, TypeVar
 
 from fastapi import APIRouter, HTTPException
 
@@ -50,3 +51,14 @@ def log_and_raise(
     if cause is not None:
         raise exec from cause
     raise exec
+
+
+
+T = TypeVar("T")
+
+@lru_cache
+def provide(depend_cls: type[T]) -> Callable[[], T]:
+    @lru_cache
+    def getter() -> T:
+        return depend_cls()
+    return getter() 
