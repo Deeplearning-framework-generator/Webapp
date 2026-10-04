@@ -1,19 +1,27 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import './App.css'
-import Sidebar from './components/Sidebar.jsx'
+import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import AppLayout from './components/AppLayout.jsx'
+import DashboardPage from './pages/DashboardPage.jsx'
+import ProjectPage from './pages/ProjectPage.jsx'
+import BlocksPage from './pages/BlocksPage.jsx'
 
-function App() {
-  const [count, setCount] = useState(0)
-
+export default function App() {
   return (
-    <div className="flex">
-      <Sidebar/>
-    </div>
-    
+    <BrowserRouter>
+      <Routes>
+        
+        <Route element={<AppLayout />}>
+          <Route index element={<DashboardPage />} />
+          <Route path="projects" element={<ProjectPage />} />
+          <Route path="blocks" element={<BlocksPage />} />
+
+        </Route>
+
+        {/*
+          Pages that should NOT have the sidebar/header/footer
+          (e.g. the full-screen canvas editor) go OUTSIDE the layout route:
+          <Route path="/projects/:id/canvas" element={<CanvasPage />} />
+        */}
+      </Routes>
+    </BrowserRouter>
   )
 }
-
-export default App
