@@ -1,5 +1,6 @@
 .vscode/
 .logs/
-resources/
-!**/resources/application.yaml
+# resources/
+# !**/resources/application.yaml
+**.env
 **/__pycache__/**
