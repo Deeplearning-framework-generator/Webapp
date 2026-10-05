@@ -1,3 +1,5 @@
 fastapi[standard]
 sqlalchemy[asyncio]
 fastapi-repository
+pydantic-settings[yaml]
+psycopg2-binary

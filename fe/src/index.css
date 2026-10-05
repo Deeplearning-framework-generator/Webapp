@@ -1,112 +1,68 @@
+/* Load Tailwind CSS (v4) */
 @import "tailwindcss";
+
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+
+/* ---------- Light theme (default) ---------- */
 :root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
-
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
-
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-
-  @media (max-width: 1024px) {
-    font-size: 16px;
-  }
+  --page: #f6f7f2;       /* page bg */
+  --surface: #ffffff;    /* sidebar, header, footer, cards */
+  --line: #e4e5df;       /* borders and dividers */
+  --ink: #1b1c1a;        /* main text */
+  --muted: #5f635e;      /* secondary text, icons */
+  --nav: #3d403c;        /* sidebar links that aren't selected */
+  --hover: #f0f1ec;      /* hover background for buttons/links */
+  --active: #f1eafd;     /* selected sidebar item background */
+  --active-ink: #6d28d9; /* selected sidebar item text and icon */
+  --accent: #7c3aed;     /* brand colour: logo, dots, primary buttons */
+  --ok: #10823c;         /* green "connected" status */
+  color-scheme: light;   /* tells the browser to use light scrollbars, inputs, etc. */
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
-
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
+/* ---------- Dark theme (when <html class="dark">) ---------- */
+.dark {
+  --page: #111312;
+  --surface: #191b1a;
+  --line: #2a2e2b;
+  --ink: #e9eae5;
+  --muted: #a4a8a1;
+  --nav: #c9ccc5;
+  --hover: #222523;
+  --active: #2a2045;
+  --active-ink: #c4a8ff;
+  --accent: #9b6dff;
+  --ok: #3cc274;
+  color-scheme: dark;
 }
 
+/*
+  Turns the variables above into Tailwind classes.
+  "inline" means Tailwind uses var(--surface) directly, so the class
+  automatically changes when the theme changes.
+*/
+@theme inline {
+  --color-page: var(--page);
+  --color-surface: var(--surface);
+  --color-line: var(--line);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-nav: var(--nav);
+  --color-hover: var(--hover);
+  --color-active: var(--active);
+  --color-active-ink: var(--active-ink);
+  --color-accent: var(--accent);
+  --color-ok: var(--ok);
+}
+
+@theme {
+  --font-sans: "IBM Plex Sans", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+
+/* Base page styles */
 body {
   margin: 0;
-}
-
-#root {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
-}
-
-h1,
-h2 {
-  font-family: var(--heading);
-  font-weight: 500;
-  color: var(--text-h);
-}
-
-h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
-  }
-}
-h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
-}
-p {
-  margin: 0;
-}
-
-code,
-.counter {
-  font-family: var(--mono);
-  display: inline-flex;
-  border-radius: 4px;
-  color: var(--text-h);
-}
-
-code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
+  background: var(--page);
 }
