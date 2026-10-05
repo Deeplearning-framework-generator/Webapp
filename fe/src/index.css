@@ -18,6 +18,7 @@
   --active-ink: #6d28d9; /* selected sidebar item text and icon */
   --accent: #7c3aed;     /* brand colour: logo, dots, primary buttons */
   --ok: #10823c;         /* green "connected" status */
+  --surface-soft: #fafaf7;
   color-scheme: light;   /* tells the browser to use light scrollbars, inputs, etc. */
 }
 
@@ -34,6 +35,7 @@
   --active-ink: #c4a8ff;
   --accent: #9b6dff;
   --ok: #3cc274;
+  --surface-soft: #232725;
   color-scheme: dark;
 }
 
@@ -54,6 +56,7 @@
   --color-active-ink: var(--active-ink);
   --color-accent: var(--accent);
   --color-ok: var(--ok);
+  --color-surface-soft: var(--surface-soft);
 }
 
 @theme {
