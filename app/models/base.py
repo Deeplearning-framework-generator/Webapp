@@ -1,13 +1,15 @@
 from datetime import datetime
 
-from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy import String
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 class Base(DeclarativeBase):
     pass
-class BaseEntity(DeclarativeBase):
-    create_date: datetime
-    create_by: str
-    update_date: datetime
-    update_by: str
-    delete_date: datetime
-    delete_by: str
+
+class BaseEntity:
+    create_date: Mapped[datetime | None] = mapped_column(default=None)
+    create_by: Mapped[str | None] = mapped_column(String(255), default=None)
+    update_date: Mapped[datetime | None] = mapped_column(default=None)
+    update_by: Mapped[str | None] = mapped_column(String(255), default=None)
+    delete_date: Mapped[datetime | None] = mapped_column(default=None)
+    delete_by: Mapped[str | None] = mapped_column(String(255), default=None)
