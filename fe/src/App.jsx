@@ -3,6 +3,7 @@ import AppLayout from './components/AppLayout.jsx'
 import DashboardPage from './pages/DashboardPage.jsx'
 import ProjectPage from './pages/ProjectPage.jsx'
 import BlocksPage from './pages/BlocksPage.jsx'
+import CreateBlock from './pages/CreateBlock.jsx'
 
 export default function App() {
   return (
@@ -13,6 +14,7 @@ export default function App() {
           <Route index element={<DashboardPage />} />
           <Route path="projects" element={<ProjectPage />} />
           <Route path="blocks" element={<BlocksPage />} />
+          <Route path="blocks/new" element={<CreateBlock />} />
 
         </Route>
 
