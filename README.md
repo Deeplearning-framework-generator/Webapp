@@ -1,5 +1,9 @@
 # Webapp
+## Running the frontend
 
-uvicorn app.main:app --reload
+```bash
+cd fe
+npm install
+npm run dev
+```
 
-postgresql+psycopg2://username:password@host:port/database_name
