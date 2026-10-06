@@ -24,7 +24,7 @@ class DataSourceSettings(BaseModel):
 class Settings(BaseSettings):
     env: str = "dev"
     cors_origins: list[str] = ["http://localhost:5173"]
-    data_source: DataSourceSettings = DataSourceSettings()
+    data_source: DataSourceSettings
 
     model_config = SettingsConfigDict(
         yaml_file=YAML_FILES,
@@ -45,4 +45,4 @@ class Settings(BaseSettings):
 
 @lru_cache
 def get_settings() -> Settings:
-    return Settings()
+    return Settings() # pyright: ignore[reportCallIssue]

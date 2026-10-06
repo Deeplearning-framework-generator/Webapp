@@ -4,5 +4,5 @@ data_source:
   host: localhost
   drivername: postgresql+psycopg2
   port: 5432
-  database: DF
+  database: df
   pool_size: 5
