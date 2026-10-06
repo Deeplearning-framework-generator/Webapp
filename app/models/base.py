@@ -6,7 +6,7 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 class Base(DeclarativeBase):
     pass
 
-class BaseEntity:
+class AuditFields:
     create_date: Mapped[datetime | None] = mapped_column(default=None)
     create_by: Mapped[str | None] = mapped_column(String(255), default=None)
     update_date: Mapped[datetime | None] = mapped_column(default=None)

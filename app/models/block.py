@@ -3,9 +3,9 @@ from datetime import datetime
 from sqlalchemy import ForeignKey, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.dialects.postgresql import JSONB
-from .base import Base, BaseEntity
+from .base import Base, AuditFields
 
-class Block(BaseEntity):
+class Block(Base,AuditFields):
     __tablename__ = "block"
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(255))

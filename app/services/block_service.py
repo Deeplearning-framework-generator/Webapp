@@ -10,7 +10,7 @@ from app.utils import provide
 
 
 class BlockService:
-    def __init__(self, repo: Annotated[BlockRepository, Depends(provide(BlockRepository))]):
+    def __init__(self, repo: Annotated[BlockRepository, Depends(BlockRepository)]):
         self.repo = repo
     def getBlockList(self, block_filters: BlockFilter, page_params: PageParams) -> PageWrapper[BlockDto]:
         count = self.repo.count_block_list()
