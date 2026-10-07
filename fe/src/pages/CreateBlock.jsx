@@ -2,9 +2,11 @@ import { useEffect, useState } from "react";
 import { python } from "@codemirror/lang-python";
 import { EditorView } from "@codemirror/view";
 import CodeMirror from "@uiw/react-codemirror";
-const INITIAL_CODE = `import torch.nn as nn
-
-class Module(nn.Module):
+import { useSelectData } from "../hooks/select";
+import { SelectField, TextField } from "../components/Field";
+import { ModuleEditor } from "../components/ModuleEditor";
+import { useCodeSpec } from "../hooks/useCodeSpec";
+const INITIAL_CODE = `class Module(nn.Module):
     def __init__(self):
         super().__init__()
 
@@ -19,6 +21,8 @@ const transparentBg = EditorView.theme({
   },
 });
 
+const extensions = [python(), transparentBg];
+
 function useIsDark() {
   const get = () => document.documentElement.classList.contains("dark");
   const [dark, setDark] = useState(get);
@@ -32,84 +36,87 @@ function useIsDark() {
   }, []);
   return dark;
 }
-
 export default function CreateBlock() {
   const [code, setCode] = useState(INITIAL_CODE);
-  const [blockName, setBlockName] = useState("Module");
   const [registryName, setRegistryName] = useState("module");
-  const [type, setType] = useState("");
-  
   const isDark = useIsDark();
+  const { spec, onCreateEditor, onUpdate, setName, setBase, setParams } =
+    useCodeSpec();
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState("");
+  const handleSave = async () => {
+    setSaving(true);
+    setSaveError("");
+    try {
+      const res = await fetch("/api/v1/blocks/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          registry_name: registryName,
+          file_name: `${registryName}.py`,
+          code: code,
+          name: spec.name,
+          base: spec.base,
+          params: spec.params,
+        }),
+      });
+      if (!res.ok) throw new Error(`Server said ${res.status}`);
+      // success: navigate away or show a toast here
+    } catch (err) {
+      setSaveError(err.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
-    <main className="grid grid-rows-1 grid-cols-5 gap-4">
-      <div className="col-span-3">
-        <div className="overflow-hidden rounded-xl border border-line bg-surface">
-          <div className="border-b border-line bg-surface-soft px-4 py-2 font-mono text-xs text-muted">
-            conv_block.py
-          </div>
-          <CodeMirror
-            value={code}
-            onChange={(value) => setCode(value)}
-            theme={isDark ? "dark" : "light"}
-            extensions={[python(), transparentBg]}
-            height="320px"
-            basicSetup={{
-              lineNumbers: true,
-              foldGutter: true,
-            }}
-          />
-        </div>
-      </div>
-      <div className="col-span-2">
-        <div className="rounded-xl border border-line bg-surface p-4">
-          <form
-            className="grid grid-cols-2 gap-2"
-            onSubmit={(e) => e.preventDefault()}
+    <div>
+      <div className="flex mb-4">
+        <div className="ml-auto">
+          {saveError && <p className="text-sm text-red-500">{saveError}</p>}
+          <button
+            onClick={handleSave}
+            // disabled={!canSave}
+            className="rounded-md bg-accent px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
           >
-            <div className="flex flex-col gap-2">
-              <label htmlFor="block-name" className="text-xs text-muted">
-                Block Name
-              </label>
-              <input
-                id="block-name"
-                type="text"
-                value={blockName}
-                onChange={(e) => setBlockName(e.target.value)}
-                className="rounded-md border border-line bg-surface-soft px-3 py-2 text-sm outline-none focus:border-accent"
-              />
-            </div>
-            <div className="flex flex-col gap-2">
-              <label htmlFor="registry-name" className="text-xs text-muted">
-                Registry Name
-              </label>
-              <input
-                id="registry-name"
-                type="text"
-                value={registryName}
-                onChange={(e) => setRegistryName(e.target.value)}
-                className="rounded-md border border-line bg-surface-soft px-3 py-2 text-sm outline-none focus:border-accent"
-              />
-            </div>
-            <div className="flex flex-col gap-2">
-              <label htmlFor="type" className="text-xs text-muted">
-                Type
-              </label>
-              <select
-                id="type"
-                value={type}
-                onChange={(e) => setType(e.target.value)}
-                className="rounded-md border border-line bg-surface-soft px-3 py-2 text-sm outline-none focus:border-accent"
-              >
-                {type.map((t) => (
-                    <option key={t.value} value={t.value}>
-                      {t.label}
-                    </option>
-                ))}
-              </select>
-            </div>
-          </form>
+            {saving ? "Saving..." : "Save block"}
+          </button>
         </div>
       </div>
-    </main>
+      <div className="grid grid-rows-1 grid-cols-5 gap-4">
+        <div className="col-span-3">
+          <div className="overflow-hidden rounded-xl border border-line bg-surface">
+            <div className="border-b border-line bg-surface-soft px-4 py-2 font-mono text-xs text-muted">
+              {registryName || "unregistered"}.py
+            </div>
+            <CodeMirror
+              value={code}
+              onChange={setCode}
+              onCreateEditor={onCreateEditor}
+              onUpdate={onUpdate}
+              theme={isDark ? "dark" : "light"}
+              extensions={extensions}
+              height="320px"
+              basicSetup={{
+                lineNumbers: true,
+                foldGutter: true,
+              }}
+            />
+          </div>
+        </div>
+        <div className="col-span-2">
+          <div className="rounded-xl border border-line bg-surface p-4">
+            <ModuleEditor
+              spec={spec}
+              setName={setName}
+              setBase={setBase}
+              registryName={registryName}
+              setRegistryName={setRegistryName}
+              setParams={setParams}
+            />
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

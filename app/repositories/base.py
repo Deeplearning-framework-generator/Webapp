@@ -11,6 +11,8 @@ class BaseRepository(Generic[ModelT]):
 
     def get(self, id: int) -> ModelT | None:
         return self.db.get(self.model, id)
+    def get_all(self) -> list[ModelT]:
+        return list(self.db.scalars(select(self.model)))
 
     def list(self, offset: int = 0, limit: int = 20) -> list[ModelT]:
         return list(self.db.scalars(select(self.model).offset(offset).limit(limit)))

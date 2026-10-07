@@ -6,9 +6,9 @@ class ORMModel(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 class AuditFields(BaseModel): 
-    create_date: datetime
-    create_by: str
-    update_date: datetime
-    update_by: str
-    delete_date: datetime
-    delete_by: str
+    create_date: datetime | None = None
+    create_by: str | None = None
+    update_date: datetime | None = None
+    update_by: str | None = None
+    delete_date: datetime | None = None
+    delete_by: str | None = None
