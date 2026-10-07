@@ -8,13 +8,18 @@ from app.schemas.common.base import AuditFields, ORMModel
 
 class BlockBase(BaseModel):
     name: str
-    kind: str
-    description: str = ""
+    base: str
     # TODO: consider user request for their block to remain private 
     # visibility: Visibility = Visibility
-
+class Param(BaseModel):
+    name: str
+    type: str = ""
+    default: str = ""
 class BlockCreate(BlockBase):
-    source: str = Field(max_length=200_000)
+    registry_name: str
+    file_name: str
+    code: str
+    params: list[Param] = []
 
 class BlockDto(ORMModel, BlockBase, AuditFields):
     id: int

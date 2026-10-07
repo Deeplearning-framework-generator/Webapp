@@ -9,8 +9,8 @@ class Block(Base,AuditFields):
     __tablename__ = "block"
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(255))
-    registry_name: Mapped[str] = mapped_column(String(255))
-    type: Mapped[str] = mapped_column(String(255))
+    registry_name: Mapped[str] = mapped_column(String(255)) # registry name is the file name
+    type: Mapped[str] = mapped_column(String(255)) # type is the base class name nn.Module ...
     modality: Mapped[str | None] = mapped_column(String(255))
 
     versions: Mapped[list["BlockVersion"]] = relationship(back_populates="block")
