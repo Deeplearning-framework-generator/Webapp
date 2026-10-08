@@ -4,11 +4,11 @@ export const navItems = [
   { label: 'Dashboard', to: '/', icon: LayoutGrid, end: true },
   { label: 'Projects', to: '/projects', icon: Folder },
   { label: 'Blocks', to: '/blocks', icon: Box },
+  { label: 'Create Block', to: '/blocks/new', icon: Box, hidden: true },
 ]
 
-export function getSectionName(pathname) {
-  const item = navItems.find(({ to, end }) =>
+export function getBreadcrumbs(pathname) {
+  return navItems.filter(({ to, end }) =>
     end ? pathname === to : pathname.startsWith(to)
   )
-  return item?.label ?? ''
 }

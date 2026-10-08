@@ -1,6 +1,8 @@
-import { useLocation } from 'react-router-dom'
+import { Fragment } from 'react'
+import { Link, useLocation } from 'react-router-dom'
 import { Bell, ChevronDown, CircleHelp, Moon, PanelLeft, Sun } from 'lucide-react'
-import { getSectionName } from './navItems.js'
+import { getBreadcrumbs } from './navItems.js'
+
 
 const iconButton =
   'inline-flex size-11 shrink-0 items-center justify-center rounded-lg text-muted transition-colors hover:bg-hover hover:text-ink'
@@ -8,6 +10,7 @@ const iconButton =
 export default function Header({ collapsed, onToggleSidebar, theme, onToggleTheme }) {
 
   const { pathname } = useLocation()
+  const crumbs = getBreadcrumbs(pathname)
   const isDark = theme === 'dark'
 
   return (
@@ -27,9 +30,30 @@ export default function Header({ collapsed, onToggleSidebar, theme, onToggleThem
         <PanelLeft className="size-5" strokeWidth={1.8} />
       </button>
         {/* Section name */}
-      <span className="min-w-0 truncate text-[15px] font-semibold">
+      {/* <span className="min-w-0 truncate text-[15px] font-semibold">
         {getSectionName(pathname)}
-      </span>
+      </span> */}
+      {/* Breadcrumb */}
+      <nav aria-label="Breadcrumb" className="flex min-w-0 items-center gap-2 text-[15px] font-semibold">
+        {crumbs.map((item, index) => {
+          const isLast = index === crumbs.length - 1
+
+          return (
+            <Fragment key={item.to}>
+              {index > 0 && <span className="text-muted">/</span>}
+
+              {isLast ? (
+                <span className="truncate" aria-current="page">{item.label}</span>
+              ) : (
+                <Link to={item.to} className="text-muted transition-colors hover:text-ink">
+                  {item.label}
+                </Link>
+              )}
+            </Fragment>
+          )
+        })}
+      </nav>
+
 
       <div className="ml-auto flex items-center gap-1">
         <button
