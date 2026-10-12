@@ -66,7 +66,7 @@ export default function CreateBlock() {
       });
       if (!res.ok) throw new Error(`Server said ${res.status}`);
     } catch (err) {
-      setSaveError(err.message);
+      setValidateError(err.message);
     } finally {
       setValidating(false);
     }
