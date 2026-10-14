@@ -4,3 +4,6 @@
 # !**/resources/application.yaml
 **.env
 **/__pycache__/**
+node_modules
+package-lock.json
+package.json

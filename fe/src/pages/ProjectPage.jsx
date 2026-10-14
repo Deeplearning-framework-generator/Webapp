@@ -7,12 +7,14 @@
 // ProjectPage.jsx
 import { useState } from 'react';
 import { Search } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+
 
 const mockProjects = [
-  { name: 'CIFAR-10 Classifier', modality: 'Image', lastRun: 'skip-v2', status: 'Training', bestResult: 'val/acc 74.1%', updated: '2 min ago' },
-  { name: 'Speech Commands', modality: 'Audio', lastRun: 'baseline', status: 'Waiting for Colab', bestResult: 'None yet', updated: 'Today' },
-  { name: 'ViT Flowers', modality: 'Image', lastRun: 'baseline', status: 'Failed', bestResult: 'None yet', updated: 'Yesterday' },
-  { name: 'Sentiment Transformer', modality: 'Text', lastRun: 'None', status: 'Not run yet', bestResult: 'None yet', updated: '3 days ago' },
+  { id: 'cifar-10-classifier', name: 'CIFAR-10 Classifier', modality: 'Image', lastRun: 'skip-v2', status: 'Training', bestResult: 'val/acc 74.1%', updated: '2 min ago' },
+  { id: 'speech-commands', name: 'Speech Commands', modality: 'Audio', lastRun: 'baseline', status: 'Waiting for Colab', bestResult: 'None yet', updated: 'Today' },
+  { id: 'vit-flowers', name: 'ViT Flowers', modality: 'Image', lastRun: 'baseline', status: 'Failed', bestResult: 'None yet', updated: 'Yesterday' },
+  { id: 'sentiment-transformer', name: 'Sentiment Transformer', modality: 'Text', lastRun: 'None', status: 'Not run yet', bestResult: 'None yet', updated: '3 days ago' },
 ];
 
 const StatusBadge = ({ status }) => {
@@ -28,12 +30,17 @@ const StatusBadge = ({ status }) => {
 export default function ProjectPage() {
   const [modality, setModality] = useState('All');
   const [search, setSearch] = useState('');
+  const navigate = useNavigate();
 
   const filteredProjects = mockProjects.filter((p) => {
     const matchModality = modality === 'All' || p.modality === modality;
     const matchSearch = p.name.toLowerCase().includes(search.toLowerCase());
     return matchModality && matchSearch;
   });
+
+  const handleProjectClick = (projectId) => {
+    navigate(`/projects/${projectId}`);
+  };
 
   return (
     <div className="p-8 max-w-6xl mx-auto">
@@ -91,7 +98,7 @@ export default function ProjectPage() {
           <tbody className="divide-y divide-gray-100">
             {filteredProjects.length > 0 ? (
               filteredProjects.map((p, idx) => (
-                <tr key={idx} className="hover:bg-gray-50">
+                <tr key={idx} className="hover:bg-gray-50" onClick={() => handleProjectClick(p.id)}>
                   <td className="px-6 py-4 font-medium text-gray-900">{p.name}</td>
                   <td className="px-6 py-4 text-gray-600">{p.modality}</td>
                   <td className="px-6 py-4 text-gray-600">{p.lastRun}</td>
@@ -121,7 +128,7 @@ export default function ProjectPage() {
           <input 
             type="text" 
             placeholder="e.g. Audio Classifier" 
-            className="border border-gray-200 rounded-md px-3 py-2 text-sm w-64 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+            className="border text-gray-500 rounded-md px-3 py-2 text-sm w-64 focus:outline-none focus:ring-1 focus:ring-emerald-500"
           />
           <button className="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-md text-sm font-medium">
             Create
