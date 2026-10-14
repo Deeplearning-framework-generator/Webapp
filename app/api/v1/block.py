@@ -36,3 +36,11 @@ def save_created_block(
 ):
     service.save_block(block_create)
     return ping()
+
+@router.post("/validate")
+def validate_block(
+    block_create: BlockCreate,
+    service: Annotated[BlockService, Depends()]
+):
+    service.validate_block(block_create)
+    return ping()

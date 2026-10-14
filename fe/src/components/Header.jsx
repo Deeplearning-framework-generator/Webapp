@@ -15,7 +15,7 @@ export default function Header({ collapsed, onToggleSidebar, theme, onToggleThem
 
   return (
     <header
-      className="sticky top-0 z-10 flex h-16 shrink-0 items-center gap-3 border-b border-line bg-surface pr-4 pl-3 md:pr-6 md:pl-4"
+      className="sticky top-0 z-10 flex h-14 shrink-0 items-center gap-3 border-b border-line bg-surface pr-4 pl-3 md:pr-6 md:pl-4"
      
     >
 
