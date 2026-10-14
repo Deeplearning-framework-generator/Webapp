@@ -48,6 +48,8 @@ export default function CreateBlock() {
   const [saveError, setSaveError] = useState("");
   const [validating, setValidating] = useState(false);
   const [validateError, setValidateError] = useState("");
+  const [inputs, setInputs] = useState([]);
+  const [outputs, setOutputs] = useState([]);
   const handleValidate = async () => {
     setValidating(true);
     setValidateError("");
@@ -148,6 +150,10 @@ export default function CreateBlock() {
               registryName={registryName}
               setRegistryName={setRegistryName}
               setParams={setParams}
+              inputs={inputs}
+              setInputs={setInputs}
+              outputs={outputs}
+              setOutputs={setOutputs}
             />
           </div>
         </div>
