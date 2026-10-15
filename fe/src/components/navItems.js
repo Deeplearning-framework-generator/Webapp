@@ -5,6 +5,7 @@ export const navItems = [
   { label: 'Projects', to: '/projects', icon: Folder },
   { label: 'Blocks', to: '/blocks', icon: Box },
   { label: 'Create Block', to: '/blocks/new', icon: Box, hidden: true },
+  { label: 'Data Block', to: '/blocks/data', icon: Box, hidden: true },
 ]
 
 export function getBreadcrumbs(pathname) {
