@@ -37,7 +37,7 @@ class DatabaseSessionManager:
         return missing
 
     @contextmanager
-    def session(self) -> Generator[Session]:
+    def session(self) -> Generator[Session, None, None]:
         if self._sessionmaker is None:
             log_and_raise(RuntimeError(f"{__class__.__name__} is not initialized"))
         db = self._sessionmaker()
