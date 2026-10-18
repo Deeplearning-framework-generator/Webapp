@@ -3,7 +3,7 @@ from typing import Generic, TypeVar
 import math
 
 T = TypeVar("T")
-PAGE_SIZE = 10
+PAGE_SIZE = 12
 MAX_PAGE = 5
 
 
