@@ -1,9 +1,12 @@
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Settings, ArrowLeft, Play } from 'lucide-react';
 
 export default function ProjectDetailPage() {
   const { projectId } = useParams();
   const navigate = useNavigate();
+  const { project } = useLocation().state || { project: { name: 'Unknown Project' } };
+  const projectName = project?.name || 'Unknown Project';
+  const updated = project?.updated || 'Unknown';
 
   return (
     <div className="h-screen flex flex-col text-ink bg-page">
@@ -17,8 +20,8 @@ export default function ProjectDetailPage() {
             <ArrowLeft className="w-4 h-4 text-ink" />
           </button>
           <div>
-            <h1 className="text-sm font-semibold text-ink">CIFAR-10 Classifier</h1>
-            <p className="text-xs text-muted">Saved 1 min ago</p>
+            <h1 className="text-sm font-semibold text-ink">{projectName}</h1>
+            <p className="text-xs text-muted">Saved {updated}</p>
           </div>
         </div>
         <div className="flex items-center gap-2">

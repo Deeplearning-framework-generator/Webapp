@@ -9,21 +9,54 @@ import { useState, useEffect } from 'react';
 import { Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
+class ProjectModel {
+  constructor({ id, name, modality, lastRun, status, bestResult, updated }) {
+    this.id = id || 'unknown-id';
+    this.name = name || 'Unnamed Project';
+    this.modality = modality || 'Unknown';
+    this.lastRun = lastRun || 'None';
+    this.status = status || 'Not run yet';
+    this.bestResult = bestResult || 'None yet';
+    this.updated = updated || 'Just now';
+  }
+}
+
 const mockProjects = [
-  { id: 'cifar-10-classifier', name: 'CIFAR-10 Classifier', modality: 'Image', lastRun: 'skip-v2', status: 'Training', bestResult: 'val/acc 74.1%', updated: '2 min ago' },
-  { id: 'speech-commands', name: 'Speech Commands', modality: 'Audio', lastRun: 'baseline', status: 'Waiting for Colab', bestResult: 'None yet', updated: 'Today' },
-  { id: 'vit-flowers', name: 'ViT Flowers', modality: 'Image', lastRun: 'baseline', status: 'Failed', bestResult: 'None yet', updated: 'Yesterday' },
-  { id: 'sentiment-transformer', name: 'Sentiment Transformer', modality: 'Text', lastRun: 'None', status: 'Not run yet', bestResult: 'None yet', updated: '3 days ago' },
+  new ProjectModel({}),
+  new ProjectModel({ id: 'cifar-10-classifier', name: 'CIFAR-10 Classifier', modality: 'Image', lastRun: 'skip-v2', status: 'Training', bestResult: 'val/acc 74.1%', updated: '2 min ago' }),
+  new ProjectModel({ id: 'speech-commands', name: 'Speech Commands', modality: 'Audio', lastRun: 'baseline', status: 'Waiting for Colab', bestResult: 'None yet', updated: 'Today' }),
+  new ProjectModel({ id: 'vit-flowers', name: 'ViT Flowers', modality: 'Image', lastRun: 'baseline', status: 'Failed', bestResult: 'None yet', updated: 'Yesterday' }),
+  new ProjectModel({ id: 'sentiment-transformer', name: 'Sentiment Transformer', modality: 'Text', lastRun: 'None', status: 'Not run yet', bestResult: 'None yet', updated: '3 days ago' }),
 ];
 
 const StatusBadge = ({ status }) => {
   const styles = {
-    'Training': 'bg-blue-500/10 text-blue-400',
-    'Waiting for Colab': 'bg-orange-500/10 text-orange-400',
-    'Failed': 'bg-red-500/10 text-red-400',
-    'Not run yet': 'bg-surface-soft text-muted',
+    'Training': {
+      bg: 'bg-blue-500/10 text-blue-400',
+      dot: 'bg-blue-400',
+    },
+    'Waiting for Colab': {
+      bg: 'bg-orange-500/10 text-orange-400',
+      dot: 'bg-orange-400',
+    },
+    'Failed': {
+      bg: 'bg-red-500/10 text-red-400',
+      dot: 'bg-red-400',
+    },
+    'Not run yet': {
+      bg: 'bg-surface-soft text-muted',
+      dot: 'bg-muted',
+    },
   };
-  return <span className={`px-2 py-1 rounded-full text-xs font-medium ${styles[status] || styles['Not run yet']}`}>{status}</span>;
+
+  const currentStyle = styles[status] || styles['Not run yet'];
+
+  return (
+    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${currentStyle.bg}`}>
+      <span className={`w-1.5 h-1.5 rounded-full ${currentStyle.dot}`} />
+      {status}
+    </span>
+  );
 };
 
 export default function ProjectPage() {
@@ -38,7 +71,8 @@ export default function ProjectPage() {
   });
 
   const handleProjectClick = (projectId) => {
-    navigate(`/projects/${projectId}`);
+    const project = mockProjects.find((p) => p.id === projectId);
+    navigate(`/projects/${projectId}`, { state: { project } });
   };
 
   return (
