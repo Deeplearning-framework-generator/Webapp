@@ -5,6 +5,7 @@ import ProjectPage from './pages/ProjectPage.jsx'
 import ProjectDetailPage from './pages/ProjectDetailPage.jsx'
 import BlocksPage from './pages/BlocksPage.jsx'
 import CreateBlock from './pages/CreateBlock.jsx'
+import DataBlock from './pages/DataBlock.jsx'
 
 export default function App() {
   return (
@@ -17,7 +18,7 @@ export default function App() {
           <Route path="projects/:projectId" element={<ProjectDetailPage />} />
           <Route path="blocks" element={<BlocksPage />} />
           <Route path="blocks/new" element={<CreateBlock />} />
-
+          <Route path="blocks/data" element={<DataBlock />} />
         </Route>
 
         {/*

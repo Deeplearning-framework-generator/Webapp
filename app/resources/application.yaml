@@ -3,6 +3,8 @@ cors_origins:
 data_source:
   host: localhost
   drivername: postgresql+psycopg2
+  username: username
+  password: password
   port: 5432
-  database: df
+  database: database_name
   pool_size: 5

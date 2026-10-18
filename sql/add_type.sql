@@ -1,2 +1,4 @@
-INSERT INTO type (name, create_date)
-VALUES ('module', now()), ('dataset', now());
+INSERT INTO type (name, code, create_date)
+VALUES 
+    ('module', 'MODULE_CODE', now()), 
+    ('dataset', 'DATASET_CODE', now());

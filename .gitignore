@@ -1,9 +1,50 @@
-.vscode/
-.logs/
-# resources/
-# !**/resources/application.yaml
+# Environments
+.venv/
+venv/
+env/
 **.env
+<<<<<<< HEAD
 **/__pycache__/**
 node_modules
 package-lock.json
 package.json
+=======
+
+# Deep Learning Framework folder (managed separately)
+DeepLearning_Framework/
+deeplearning_framework/
+
+# Test directories & coverage
+tests/
+test_*.py
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Python bytecode & cache
+**/__pycache__/**
+*.py[cod]
+*$py.class
+
+# Local sqlite databases
+*.db
+*.sqlite3
+app_dev.db
+
+# IDE & Editor files
+.vscode/
+.idea/
+.logs/
+*.log
+
+# Frontend build & dependencies
+fe/node_modules/
+fe/dist/
+fe/.vite/
+
+# Docker compose
+docker-compose*.yml
+
+# Miscellaneous
+commands.txt
+>>>>>>> 80efa12b6efd631f707984ccf924575cdf547cf9

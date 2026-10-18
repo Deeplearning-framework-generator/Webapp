@@ -35,22 +35,22 @@ def include_routers(
     return included
 
 def log_and_raise(
-        exc: Exception,
-        message: str |None = None,
-        *,
-        logger: logging.Logger | None = None,
-        level: int= logging.error,
-        cause: Exception |None = None
+    exc: Exception,
+    message: str | None = None,
+    *,
+    logger: logging.Logger | None = None,
+    level: int = logging.ERROR,
+    cause: Exception | None = None,
 ) -> NoReturn:
     (logger or log).log(
         level,
         message or str(exc),
         exc_info=cause or exc,
-        stacklevel=2
+        stacklevel=2,
     )
     if cause is not None:
-        raise exec from cause
-    raise exec
+        raise exc from cause
+    raise exc
 
 
 
