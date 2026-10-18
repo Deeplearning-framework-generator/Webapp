@@ -38,3 +38,6 @@ fe/.vite/
 
 # Docker compose
 docker-compose*.yml
+
+# Miscellaneous
+commands.txt

@@ -41,6 +41,15 @@ export default function BlocksHeader({ onOpenUploadModal, onAddDataset }) {
           <span>Upload .py file</span>
         </button>
 
+        {/* + New Data Block */}
+        <Link
+          to="/blocks/data"
+          className="inline-flex items-center gap-1.5 rounded-lg border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/50 px-3.5 py-1.5 text-xs font-semibold shadow-2xs transition-colors cursor-pointer"
+        >
+          <Plus className="size-4" strokeWidth={2.5} />
+          <span>New data block</span>
+        </Link>
+
         {/* + New block */}
         <Link
           to="/blocks/new"
