@@ -4,3 +4,4 @@
 # !**/resources/application.yaml
 **.env
 **/__pycache__/**
+commands.txt
