@@ -1,5 +1,21 @@
 import { useState, useMemo, useEffect } from 'react'
 
+export function formatDisplayName(rawName) {
+  if (!rawName) return 'Custom Block'
+  const clean = rawName.replace(/\.py$/i, '')
+  if (clean.includes('_') || clean.includes('-')) {
+    return clean
+      .split(/[-_]+/)
+      .filter(Boolean)
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(' ')
+  }
+  return clean
+    .replace(/([A-Z]+)([A-Z][a-z])/g, '$1 $2')
+    .replace(/([a-z\d])([A-Z])/g, '$1 $2')
+    .trim()
+}
+
 // Initial list of blocks based on the exact UI screenshot and additional ML blocks for pagination testing
 const INITIAL_BLOCKS = [
   {
@@ -218,14 +234,14 @@ export function useBlocks() {
   // Fetch real blocks from Backend API on mount
   const fetchBlocksFromBackend = async () => {
     try {
-      const res = await fetch('/api/v1/blocks?all=true')
+      const res = await fetch('/api/v1/blocks?all=true&sort=newest')
       if (res.ok) {
         const json = await res.json()
         if (json && Array.isArray(json.data) && json.data.length > 0) {
-          // Normalize block format from API
+          // Normalize block format from API and format names nicely
           const normalized = json.data.map((item) => ({
             id: String(item.id),
-            name: item.name,
+            name: formatDisplayName(item.name),
             category: item.category || 'LAYER',
             version: item.version || 'v1',
             inputs: item.inputs || [],
@@ -345,10 +361,35 @@ export function useBlocks() {
 
         const finalCategory = userCategory || parsed?.category || 'LAYER'
         const finalModality = userModality || parsed?.modality || 'All'
-        const blockName = parsed?.name || fileName.replace(/\.py$/i, '')
+        const rawBlockName = options.name || parsed?.name || formatDisplayName(fileName)
+        const blockName = formatDisplayName(rawBlockName)
         const regName = parsed?.registry_name || blockName.toLowerCase().replace(/[^a-z0-9]+/g, '_')
 
+        // Adapt IO signatures for Dataset category
+        let finalInputs = parsed?.inputs || ['in [B, ...]']
+        let finalOutputs = parsed?.outputs || ['out [B, ...]']
+        let baseClass = parsed?.base_class || 'nn.Module'
+
+        if (finalCategory === 'DATA') {
+          finalInputs = []
+          const modLower = finalModality.toLowerCase()
+          if (modLower.includes('image')) {
+            finalOutputs = ['out image [3,32,32]', 'out label']
+          } else if (modLower.includes('audio')) {
+            finalOutputs = ['out waveform [16000]', 'out label']
+          } else if (modLower.includes('text')) {
+            finalOutputs = ['out token ids', 'out label']
+          } else {
+            finalOutputs = ['out data', 'out label']
+          }
+          baseClass = 'Dataset'
+        }
+
         // Save to backend DB via /api/v1/blocks/create
+        const targetVersion = options.version || 'v1'
+        const replaceExisting = Boolean(options.replaceExisting)
+        const existingBlockId = options.existingBlockId ? Number(options.existingBlockId) : null
+
         const createRes = await fetch('/api/v1/blocks/create', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -357,12 +398,15 @@ export function useBlocks() {
             category: finalCategory,
             modality: finalModality,
             registry_name: regName,
-            base_class: parsed?.base_class || 'nn.Module',
+            base_class: baseClass,
             code: codeText,
             file_name: fileName,
-            inputs: parsed?.inputs || ['in [B, ...]'],
-            outputs: parsed?.outputs || ['out [B, ...]'],
-            params: parsed?.params || []
+            inputs: finalInputs,
+            outputs: finalOutputs,
+            params: parsed?.params || [],
+            version: targetVersion,
+            replace_existing: replaceExisting,
+            existing_block_id: existingBlockId
           })
         })
 
@@ -370,17 +414,33 @@ export function useBlocks() {
           const created = await createRes.json()
           const newBlock = {
             id: String(created.id),
-            name: created.name,
+            name: formatDisplayName(created.name),
             category: created.category || finalCategory,
-            version: created.version || 'v1',
-            inputs: created.inputs || ['in [B, ...]'],
-            outputs: created.outputs || ['out [B, ...]'],
+            version: targetVersion || created.version || 'v1',
+            inputs: created.inputs || finalInputs,
+            outputs: created.outputs || finalOutputs,
             footer: `${created.modality || finalModality}, ${created.category || finalCategory}`,
             modality: created.modality || finalModality
           }
-          setBlocks((prev) => [newBlock, ...prev])
+
+          if (replaceExisting && existingBlockId) {
+            setBlocks((prev) => [
+              newBlock,
+              ...prev.filter(
+                (b) => String(b.id) !== String(existingBlockId) && b.name.toLowerCase() !== newBlock.name.toLowerCase()
+              )
+            ])
+            showNotification(`Updated block "${newBlock.name}" to version ${newBlock.version}`)
+          } else {
+            setBlocks((prev) => [newBlock, ...prev])
+            showNotification(`Saved block "${newBlock.name}" (${newBlock.category} - ${newBlock.modality}) to database`)
+          }
+
+          setSelectedCategory('All')
+          setSelectedModality('All')
+          setSearchQuery('')
+          setCurrentPage(1)
           setBackendConnected(true)
-          showNotification(`Saved block "${newBlock.name}" (${newBlock.category} - ${newBlock.modality}) to database`)
           return
         }
       }
@@ -389,26 +449,47 @@ export function useBlocks() {
     }
 
     // Client fallback if backend is offline
-    const codeText = typeof fileOrContent === 'string' ? fileOrContent : ''
-    const nameWithoutExt = (typeof fileOrContent === 'string' ? fileName : fileOrContent.name).replace(/\.py$/i, '')
-    const capitalized = nameWithoutExt.charAt(0).toUpperCase() + nameWithoutExt.slice(1)
+    const rawFallbackName = options.name || formatDisplayName(typeof fileOrContent === 'string' ? fileName : fileOrContent.name)
+    const blockName = formatDisplayName(rawFallbackName)
     
     const finalCategory = userCategory || 'LAYER'
     const finalModality = userModality || 'All'
 
+    let finalInputs = ['in [B, ...]']
+    let finalOutputs = ['out [B, ...]']
+    if (finalCategory === 'DATA') {
+      finalInputs = []
+      finalOutputs = ['out data', 'out label']
+    }
+
+    const targetVersion = options.version || 'v1'
     const newBlock = {
-      id: String(Date.now()),
-      name: capitalized || 'Custom Py Block',
+      id: options.existingBlockId ? String(options.existingBlockId) : String(Date.now()),
+      name: blockName,
       category: finalCategory,
-      version: 'v1',
-      inputs: ['in [B, ...]'],
-      outputs: ['out [B, ...]'],
+      version: targetVersion,
+      inputs: finalInputs,
+      outputs: finalOutputs,
       footer: `${finalModality}, from ${fileName}`,
       modality: finalModality
     }
 
-    setBlocks((prev) => [newBlock, ...prev])
-    showNotification(`Added block "${newBlock.name}" (${newBlock.category} - ${newBlock.modality})`)
+    if (options.replaceExisting && options.existingBlockId) {
+      setBlocks((prev) => [
+        newBlock,
+        ...prev.filter(
+          (b) => String(b.id) !== String(options.existingBlockId) && b.name.toLowerCase() !== newBlock.name.toLowerCase()
+        )
+      ])
+      showNotification(`Updated block "${newBlock.name}" to version ${newBlock.version}`)
+    } else {
+      setBlocks((prev) => [newBlock, ...prev])
+      showNotification(`Added block "${newBlock.name}" (${newBlock.category} - ${newBlock.modality})`)
+    }
+    setSelectedCategory('All')
+    setSelectedModality('All')
+    setSearchQuery('')
+    setCurrentPage(1)
   }
 
   const addDataset = (datasetName = 'Custom Dataset') => {
@@ -424,11 +505,16 @@ export function useBlocks() {
     }
 
     setBlocks((prev) => [newBlock, ...prev])
+    setSelectedCategory('All')
+    setSelectedModality('All')
+    setSearchQuery('')
+    setCurrentPage(1)
     showNotification(`Added dataset block "${newBlock.name}"`)
   }
 
   return {
     blocks: paginatedBlocks,
+    allBlocks: blocks,
     allFilteredCount: filteredBlocks.length,
     totalBlocksCount: blocks.length,
     selectedCategory,

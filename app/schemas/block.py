@@ -33,6 +33,8 @@ class BlockCreate(BlockBase):
     inputs: list[str] = Field(default_factory=list)
     outputs: list[str] = Field(default_factory=list)
     params: list[Param] = Field(default_factory=list)
+    replace_existing: bool = False
+    existing_block_id: int | None = None
 
 
 class BlockVersionDto(ORMModel):

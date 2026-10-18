@@ -7,23 +7,38 @@ Tài liệu này hướng dẫn chi tiết các lệnh để chạy Frontend (We
 ## 1. Lệnh Chạy Database (PostgreSQL) & Khởi Tạo
 
 ### A. Chạy Container PostgreSQL (bằng Docker)
-Nếu bạn chưa có sẵn PostgreSQL trên máy, cách nhanh nhất là khởi chạy bằng Docker:
+- **Nếu container `webapp-postgres` đã được tạo từ trước (đang tắt/Exited):**
+  ```bash
+  docker start webapp-postgres
+  ```
 
-```bash
-docker run --name webapp-postgres \
-  -e POSTGRES_USER=username \
-  -e POSTGRES_PASSWORD=password \
-  -e POSTGRES_DB=database_name \
-  -p 5432:5432 \
-  -d postgres:alpine
-```
+- **Nếu chưa có container hoặc muốn tạo mới từ đầu:**
+  ```bash
+  docker run --name webapp-postgres \
+    -e POSTGRES_USER=username \
+    -e POSTGRES_PASSWORD=password \
+    -e POSTGRES_DB=database_name \
+    -p 5432:5432 \
+    -d postgres:alpine
+  ```
 
-*Nếu đã có Docker Compose, bạn có thể chạy:*
-```bash
-docker-compose up -d
-```
+- **Hoặc dùng Docker Compose:**
+  ```bash
+  docker compose up -d
+  ```
 
-### B. Cấu Hình Kết Nối Database
+### B. Khôi phục dữ liệu ban đầu (Import DB Backup)
+File backup SQL nằm trong thư mục `sql/backup_db.sql`:
+- **PowerShell (Windows):**
+  ```powershell
+  Get-Content sql/backup_db.sql | docker exec -i webapp-postgres psql -U username -d database_name
+  ```
+- **Bash (Linux / macOS):**
+  ```bash
+  docker exec -i webapp-postgres psql -U username -d database_name < sql/backup_db.sql
+  ```
+
+### C. Cấu Hình Kết Nối Database
 Tạo hoặc kiểm tra file cấu hình tại `app/resources/application.yaml` (hoặc `app/resources/application-dev.yaml`):
 
 ```yaml

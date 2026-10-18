@@ -38,13 +38,13 @@ class BlockRepository(BaseRepository[Block]):
         )
         stmt = self._apply_filters(stmt, filters)
 
-        # Apply sorting
+        # Apply sorting: Default to newest first (id DESC)
         if filters and filters.sort == "name":
             stmt = stmt.order_by(Block.name.asc())
-        elif filters and filters.sort == "newest":
-            stmt = stmt.order_by(Block.id.desc())
-        else:
+        elif filters and filters.sort == "oldest":
             stmt = stmt.order_by(Block.id.asc())
+        else:
+            stmt = stmt.order_by(Block.id.desc())
 
         stmt = stmt.offset(offset).limit(limit)
         return list(self.db.scalars(stmt).unique())
@@ -94,6 +94,47 @@ class BlockRepository(BaseRepository[Block]):
         if block_create.base_class and block_create.base_class not in {"object", "nn.Module"}:
             b_type = block_create.category.upper()
 
+        existing_block: Block | None = None
+        if block_create.replace_existing:
+            if block_create.existing_block_id:
+                existing_block = self.db.query(Block).filter(Block.id == block_create.existing_block_id, Block.delete_date.is_(None)).first()
+            if not existing_block and block_create.name:
+                clean_name = block_create.name.strip().lower()
+                existing_block = (
+                    self.db.query(Block)
+                    .filter(func.lower(Block.name) == clean_name, Block.delete_date.is_(None))
+                    .order_by(Block.id.desc())
+                    .first()
+                )
+
+        if existing_block:
+            # Update existing block metadata
+            existing_block.update_date = func.now()
+            if block_create.modality and block_create.modality != "All":
+                existing_block.modality = block_create.modality
+            if b_type:
+                existing_block.type = b_type
+
+            # Calculate next integer version number
+            max_v = max([v.version for v in existing_block.versions], default=0)
+            next_version_num = max(1, max_v + 1)
+
+            new_version = BlockVersion(
+                block_id=existing_block.id,
+                version=next_version_num,
+                code=block_create.code,
+                params=[p.model_dump() for p in block_create.params] if block_create.params else [],
+                inputs=block_create.inputs or [],
+                outputs=block_create.outputs or [],
+                create_date=func.now(),
+            )
+            existing_block.versions.insert(0, new_version)
+            self.db.add(new_version)
+            self.db.commit()
+            self.db.refresh(existing_block)
+            return existing_block
+
+        # Otherwise, create new Block
         block = Block(
             name=block_create.name,
             registry_name=block_create.registry_name or block_create.name.lower().replace(" ", "_"),

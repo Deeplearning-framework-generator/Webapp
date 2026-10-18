@@ -35,3 +35,6 @@ app_dev.db
 fe/node_modules/
 fe/dist/
 fe/.vite/
+
+# Docker compose
+docker-compose*.yml

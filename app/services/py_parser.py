@@ -38,7 +38,7 @@ class PythonBlockParser:
         docstring = ast.get_docstring(target_class) or ""
 
         # Determine Category
-        category = cls._infer_category(class_name, base_names, docstring)
+        category = cls._infer_category(class_name, base_names, docstring, target_class)
 
         # Determine Modality
         modality = cls._infer_modality(target_class, docstring, file_name)
@@ -47,12 +47,14 @@ class PythonBlockParser:
         params = cls._extract_init_params(target_class)
 
         # Extract inputs & outputs
-        inputs, outputs = cls._extract_io_signatures(target_class, category, docstring)
+        inputs, outputs = cls._extract_io_signatures(target_class, category, docstring, modality)
 
+        display_name = cls._to_display_name(class_name)
         registry_name = cls._to_snake_case(class_name)
 
         return {
-            "name": class_name,
+            "name": display_name,
+            "raw_class_name": class_name,
             "registry_name": registry_name,
             "category": category,
             "base_class": base_names[0] if base_names else "object",
@@ -82,14 +84,32 @@ class PythonBlockParser:
         s1 = re.sub("(.)([A-Z][a-z]+)", r"\1_\2", name)
         return re.sub("([a-z0-9])([A-Z])", r"\1_\2", s1).lower()
 
+    @staticmethod
+    def _to_display_name(raw_name: str) -> str:
+        import re
+        if not raw_name:
+            return "Custom Block"
+        clean = re.sub(r'\.py$', '', raw_name, flags=re.IGNORECASE)
+        # If snake_case or kebab-case (e.g. residual_attention_block -> Residual Attention Block)
+        if '_' in clean or '-' in clean:
+            parts = [p.capitalize() for p in re.split(r'[-_]+', clean) if p]
+            return ' '.join(parts)
+        # If PascalCase or CamelCase (e.g. ResidualAttentionBlock -> Residual Attention Block)
+        s1 = re.sub(r'([A-Z]+)([A-Z][a-z])', r'\1 \2', clean)
+        s2 = re.sub(r'([a-z\d])([A-Z])', r'\1 \2', s1)
+        return s2.strip()
+
     @classmethod
-    def _infer_category(cls, class_name: str, base_names: list[str], docstring: str) -> str:
+    def _infer_category(cls, class_name: str, base_names: list[str], docstring: str, cls_node: ast.ClassDef | None = None) -> str:
         c_upper = class_name.upper()
         b_upper = " ".join(base_names).upper()
         d_upper = docstring.upper()
 
-        if any("DATASET" in b or "DATA" in b for b in [b_upper, c_upper]):
-            return "DATA"
+        # Check methods in class
+        method_names = set()
+        if cls_node:
+            method_names = {n.name for n in cls_node.body if isinstance(n, ast.FunctionDef)}
+
         if any("CALLBACK" in b for b in [b_upper, c_upper]):
             return "CALLBACK"
         if any("LOSS" in b or "CRITERION" in b for b in [b_upper, c_upper]):
@@ -106,28 +126,7 @@ class PythonBlockParser:
 
     @classmethod
     def _infer_modality(cls, cls_node: ast.ClassDef, docstring: str, file_name: str) -> str:
-        text_corpus = (cls_node.name + " " + docstring + " " + file_name).lower()
-        for method in cls_node.body:
-            if isinstance(method, ast.FunctionDef):
-                text_corpus += " " + " ".join(arg.arg for arg in method.args.args)
-                for stmt in ast.walk(method):
-                    if isinstance(stmt, ast.Constant) and isinstance(stmt.value, str):
-                        text_corpus += " " + stmt.value.lower()
-
-        is_audio = any(w in text_corpus for w in ["audio", "waveform", "spectrogram", "hz", "sampling_rate", "sound"])
-        is_image = any(w in text_corpus for w in ["image", "img", "pixel", "conv2d", "b,c,h,w", "b, 3, h, w", "patch"])
-        is_text = any(w in text_corpus for w in ["text", "token", "vocab", "nlp", "sentence", "seq_len"])
-
-        if sum([is_audio, is_image, is_text]) >= 2:
-            return "Text and image" if (is_text and is_image) else "Multimodal"
-        if is_image:
-            return "Image"
-        if is_audio:
-            return "Audio"
-        if is_text:
-            return "Text"
-        if "classif" in text_corpus:
-            return "Classification"
+        # Default modality to 'All' as requested by user
         return "All"
 
     @classmethod
@@ -158,8 +157,15 @@ class PythonBlockParser:
         return params
 
     @classmethod
-    def _extract_io_signatures(cls, cls_node: ast.ClassDef, category: str, docstring: str) -> tuple[list[str], list[str]]:
+    def _extract_io_signatures(cls, cls_node: ast.ClassDef, category: str, docstring: str, modality: str = "All") -> tuple[list[str], list[str]]:
         if category == "DATA":
+            mod_lower = (modality or "").lower()
+            if "image" in mod_lower:
+                return [], ["out image [3,32,32]", "out label"]
+            if "audio" in mod_lower:
+                return [], ["out waveform [16000]", "out label"]
+            if "text" in mod_lower:
+                return [], ["out token ids", "out label"]
             return [], ["out data", "out label"]
 
         if category == "CALLBACK":

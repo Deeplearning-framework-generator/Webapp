@@ -16,6 +16,7 @@ import { CheckCircle2 } from 'lucide-react'
 export default function BlocksPage() {
   const {
     blocks,
+    allBlocks,
     allFilteredCount,
     totalBlocksCount,
     selectedCategory,
@@ -33,12 +34,28 @@ export default function BlocksPage() {
     handleSearchChange,
     setCurrentPage,
     addBlockFromPyFile,
-    addDataset
+    addDataset,
+    showNotification
   } = useBlocks()
 
   const [pendingFile, setPendingFile] = useState(null)
 
   const handleOpenUploadModalWithFile = (file) => {
+    if (!file) return
+    const ext = file.name ? file.name.split('.').pop().toLowerCase() : ''
+    
+    // Dataset uploads require actual data files/zip/folders which will be handled in a dedicated flow
+    if (['csv', 'json', 'zip', 'tar', 'gz', 'parquet', 'tsv'].includes(ext)) {
+      showNotification('Dataset upload with data files/folders will be supported in a separate dataset flow.', 'info')
+      return
+    }
+
+    if (ext !== 'py') {
+      showNotification('Please upload a Python (.py) module file.', 'info')
+      return
+    }
+
+    // For Python files, open the interactive configuration modal
     setPendingFile(file)
     setUploadModalOpen(true)
   }
@@ -91,8 +108,8 @@ export default function BlocksPage() {
         onDropFile={(file) => handleOpenUploadModalWithFile(file)}
       />
 
-      {/* Pagination component (only displayed when more than 1 page exists) */}
-      {totalPages > 1 && (
+      {/* Pagination component: always displayed when items exist, including 1 page */}
+      {allFilteredCount > 0 && (
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}
@@ -107,6 +124,7 @@ export default function BlocksPage() {
         isOpen={uploadModalOpen}
         onClose={() => setUploadModalOpen(false)}
         initialFile={pendingFile}
+        existingBlocks={allBlocks}
         onConfirm={handleModalConfirm}
       />
     </div>

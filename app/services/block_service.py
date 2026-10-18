@@ -77,7 +77,13 @@ class BlockService:
                     meta = v
                     break
 
-        version_label = meta.get("version") or (f"v{latest_v.version}" if latest_v else "v1")
+        if meta.get("version"):
+            version_label = meta["version"]
+        elif latest_v:
+            v_num = latest_v.version
+            version_label = "v1" if v_num == 1 else f"v1.{v_num - 1}"
+        else:
+            version_label = "v1"
         footer_label = meta.get("footer") or f"{modality}, uploaded file"
 
         return BlockDto(
@@ -168,17 +174,31 @@ class BlockService:
         except SyntaxError as e:
             raise HTTPException(422, f"Syntax error on line {e.lineno}: {e.msg}")
 
+        classes = [n for n in tree.body if isinstance(n, ast.ClassDef)]
+        if not classes:
+            raise HTTPException(422, "No class definitions found in the provided code.")
+
+        # Find matching class by exact name, normalized display name, or pick target class
+        clean_target = block_create.name.replace(" ", "").replace("_", "").lower()
         cls = next(
-            (n for n in tree.body if isinstance(n, ast.ClassDef) and n.name == block_create.name),
-            None,
+            (n for n in classes if n.name.lower() == clean_target or n.name.replace("_", "").lower() == clean_target),
+            classes[0]
         )
-        if cls is None:
-            raise HTTPException(422, f"No class named {block_create.name} in the code")
 
         methods = {n.name for n in cls.body if isinstance(n, ast.FunctionDef)}
-        missing = {"__init__", "forward"} - methods
-        if missing:
-            raise HTTPException(422, f"Missing method(s): {','.join(sorted(missing))}")
+        cat = (block_create.category or "LAYER").upper()
+
+        if cat == "DATA":
+            # Dataset blocks require __init__ or __getitem__
+            if "__init__" not in methods and "__getitem__" not in methods:
+                raise HTTPException(422, "Dataset block should implement __init__ or __getitem__.")
+        elif cat == "CALLBACK":
+            # Callback blocks have hook methods
+            pass
+        else:
+            # Neural network layers, merge ops, and losses require forward()
+            if "forward" not in methods:
+                raise HTTPException(422, f"Class {cls.name} must implement a forward() method.")
 
     def get_category_counts(self) -> dict[str, int]:
         return self.block_repo.get_category_counts()
