@@ -3,6 +3,12 @@
 venv/
 env/
 **.env
+<<<<<<< HEAD
+**/__pycache__/**
+node_modules
+package-lock.json
+package.json
+=======
 
 # Deep Learning Framework folder (managed separately)
 DeepLearning_Framework/
@@ -41,3 +47,4 @@ docker-compose*.yml
 
 # Miscellaneous
 commands.txt
+>>>>>>> 80efa12b6efd631f707984ccf924575cdf547cf9
