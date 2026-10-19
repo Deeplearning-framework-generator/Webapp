@@ -9,13 +9,16 @@ import { useState, useEffect } from 'react';
 import { Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
+import StatusBadge from '../components/StatusBadge';
+import { normalizeStatus, STATUS } from '../hooks/useStatus';
+
 class ProjectModel {
-  constructor({ id, name, modality, lastRun, status, bestResult, updated }) {
+  constructor({ id, name, modality, lastRun, status, bestResult, updated } = {}) {
     this.id = id || 'unknown-id';
     this.name = name || 'Unnamed Project';
     this.modality = modality || 'Unknown';
     this.lastRun = lastRun || 'None';
-    this.status = status || 'Not run yet';
+    this.status = normalizeStatus(status);
     this.bestResult = bestResult || 'None yet';
     this.updated = updated || 'Just now';
   }
@@ -23,41 +26,44 @@ class ProjectModel {
 
 const mockProjects = [
   new ProjectModel({}),
-  new ProjectModel({ id: 'cifar-10-classifier', name: 'CIFAR-10 Classifier', modality: 'Image', lastRun: 'skip-v2', status: 'Training', bestResult: 'val/acc 74.1%', updated: '2 min ago' }),
-  new ProjectModel({ id: 'speech-commands', name: 'Speech Commands', modality: 'Audio', lastRun: 'baseline', status: 'Waiting for Colab', bestResult: 'None yet', updated: 'Today' }),
-  new ProjectModel({ id: 'vit-flowers', name: 'ViT Flowers', modality: 'Image', lastRun: 'baseline', status: 'Failed', bestResult: 'None yet', updated: 'Yesterday' }),
-  new ProjectModel({ id: 'sentiment-transformer', name: 'Sentiment Transformer', modality: 'Text', lastRun: 'None', status: 'Not run yet', bestResult: 'None yet', updated: '3 days ago' }),
+  new ProjectModel({
+    id: 'cifar-10-classifier',
+    name: 'CIFAR-10 Classifier',
+    modality: 'Image',
+    lastRun: 'skip-v2',
+    status: STATUS.TRAINING,
+    bestResult: 'val/acc 74.1%',
+    updated: '2 min ago',
+  }),
+  new ProjectModel({
+    id: 'speech-commands',
+    name: 'Speech Commands',
+    modality: 'Audio',
+    lastRun: 'baseline',
+    status: STATUS.WAITING,
+    bestResult: 'None yet',
+    updated: 'Today',
+  }),
+  new ProjectModel({
+    id: 'vit-flowers',
+    name: 'ViT Flowers',
+    modality: 'Image',
+    lastRun: 'baseline',
+    status: STATUS.FAILED,
+    bestResult: 'None yet',
+    updated: 'Yesterday',
+  }),
+  new ProjectModel({
+    id: 'sentiment-transformer',
+    name: 'Sentiment Transformer',
+    modality: 'Text',
+    lastRun: 'None',
+    status: STATUS.IDLE,
+    bestResult: 'None yet',
+    updated: '3 days ago',
+  }),
 ];
 
-const StatusBadge = ({ status }) => {
-  const styles = {
-    'Training': {
-      bg: 'bg-blue-500/10 text-blue-400',
-      dot: 'bg-blue-400',
-    },
-    'Waiting for Colab': {
-      bg: 'bg-orange-500/10 text-orange-400',
-      dot: 'bg-orange-400',
-    },
-    'Failed': {
-      bg: 'bg-red-500/10 text-red-400',
-      dot: 'bg-red-400',
-    },
-    'Not run yet': {
-      bg: 'bg-surface-soft text-muted',
-      dot: 'bg-muted',
-    },
-  };
-
-  const currentStyle = styles[status] || styles['Not run yet'];
-
-  return (
-    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${currentStyle.bg}`}>
-      <span className={`w-1.5 h-1.5 rounded-full ${currentStyle.dot}`} />
-      {status}
-    </span>
-  );
-};
 
 export default function ProjectPage() {
   const [modality, setModality] = useState('All');

@@ -3,6 +3,7 @@ import AppLayout from './components/AppLayout.jsx'
 import DashboardPage from './pages/DashboardPage.jsx'
 import ProjectPage from './pages/ProjectPage.jsx'
 import ProjectDetailPage from './pages/ProjectDetailPage.jsx'
+import ProjectRunPage from './pages/ProjectRunPage.jsx'
 import BlocksPage from './pages/BlocksPage.jsx'
 import CreateBlock from './pages/CreateBlock.jsx'
 import DataBlock from './pages/DataBlock.jsx'
@@ -16,6 +17,7 @@ export default function App() {
           <Route index element={<DashboardPage />} />
           <Route path="projects" element={<ProjectPage />} />
           <Route path="projects/:projectId" element={<ProjectDetailPage />} />
+          <Route path="projects/:projectId/runs" element={<ProjectRunPage />} />
           <Route path="blocks" element={<BlocksPage />} />
           <Route path="blocks/new" element={<CreateBlock />} />
           <Route path="blocks/data" element={<DataBlock />} />
