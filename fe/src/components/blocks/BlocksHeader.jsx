@@ -13,16 +13,7 @@ export default function BlocksHeader({ onOpenUploadModal, onAddDataset }) {
   }
 
   return (
-    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between pb-2">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-          Blocks
-        </h1>
-        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-          Your library. Datasets are blocks too, and every block can be used in any project.
-        </p>
-      </div>
-
+    <div className="flex items-center justify-end pb-2">
       <div className="flex items-center gap-2.5">
         {/* Upload .py file button */}
         <input

@@ -2,17 +2,20 @@ import { useState, useMemo, useEffect } from 'react'
 
 export function formatDisplayName(rawName) {
   if (!rawName) return 'Custom Block'
-  const clean = rawName.replace(/\.py$/i, '')
-  if (clean.includes('_') || clean.includes('-')) {
+  const clean = rawName.replace(/\.py$/i, '').trim()
+  if (clean.includes('_')) {
     return clean
-      .split(/[-_]+/)
+      .split(/_+/)
       .filter(Boolean)
       .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
       .join(' ')
   }
+  if (clean.includes(' ') || clean.includes('-')) {
+    return clean
+  }
   return clean
     .replace(/([A-Z]+)([A-Z][a-z])/g, '$1 $2')
-    .replace(/([a-z\d])([A-Z])/g, '$1 $2')
+    .replace(/([a-z])([A-Z])/g, '$1 $2')
     .trim()
 }
 
@@ -306,11 +309,13 @@ export function useBlocks() {
       })()
       
       const query = searchQuery.trim().toLowerCase()
+      const blockName = (b.name || '').toLowerCase()
+      const normalizedName = blockName.replace(/[-_]+/g, ' ')
+      const normalizedQuery = query.replace(/[-_]+/g, ' ')
       const matchSearch =
         !query ||
-        b.name.toLowerCase().includes(query) ||
-        b.category.toLowerCase().includes(query) ||
-        b.footer.toLowerCase().includes(query)
+        blockName.includes(query) ||
+        normalizedName.includes(normalizedQuery)
 
       return matchCategory && matchModality && matchSearch
     })

@@ -74,16 +74,11 @@ class BlockRepository(BaseRepository[Block]):
                 )
             )
 
-        # Search query
+        # Search query (by block name)
         if filters.q and filters.q.strip():
             query_str = f"%{filters.q.strip().lower()}%"
             stmt = stmt.where(
-                or_(
-                    func.lower(Block.name).ilike(query_str),
-                    func.lower(Block.type).ilike(query_str),
-                    func.lower(Block.registry_name).ilike(query_str),
-                    func.lower(Block.modality).ilike(query_str),
-                )
+                func.lower(Block.name).ilike(query_str)
             )
 
         return stmt

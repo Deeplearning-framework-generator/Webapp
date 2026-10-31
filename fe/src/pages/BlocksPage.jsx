@@ -3,7 +3,6 @@ import { useBlocks } from '../hooks/useBlocks'
 import BlocksHeader from '../components/blocks/BlocksHeader'
 import BlocksFilterBar from '../components/blocks/BlocksFilterBar'
 import BlockGrid from '../components/blocks/BlockGrid'
-import DropPyZone from '../components/blocks/DropPyZone'
 import Pagination from '../components/blocks/Pagination'
 import UploadPyModal from '../components/blocks/UploadPyModal'
 import { CheckCircle2 } from 'lucide-react'
@@ -101,11 +100,6 @@ export default function BlocksPage() {
       <BlockGrid
         blocks={blocks}
         onResetFilters={handleResetFilters}
-      />
-
-      {/* Drag & Drop .py file zone */}
-      <DropPyZone
-        onDropFile={(file) => handleOpenUploadModalWithFile(file)}
       />
 
       {/* Pagination component: always displayed when items exist, including 1 page */}

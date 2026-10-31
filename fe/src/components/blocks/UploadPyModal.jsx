@@ -11,17 +11,20 @@ const CATEGORY_OPTIONS = [
 
 export function formatDisplayName(rawName) {
   if (!rawName) return 'Custom Block'
-  const clean = rawName.replace(/\.py$/i, '')
-  if (clean.includes('_') || clean.includes('-')) {
+  const clean = rawName.replace(/\.py$/i, '').trim()
+  if (clean.includes('_')) {
     return clean
-      .split(/[-_]+/)
+      .split(/_+/)
       .filter(Boolean)
       .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
       .join(' ')
   }
+  if (clean.includes(' ') || clean.includes('-')) {
+    return clean
+  }
   return clean
     .replace(/([A-Z]+)([A-Z][a-z])/g, '$1 $2')
-    .replace(/([a-z\d])([A-Z])/g, '$1 $2')
+    .replace(/([a-z])([A-Z])/g, '$1 $2')
     .trim()
 }
 
